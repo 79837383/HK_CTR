@@ -1,0 +1,2 @@
+dnn_input_dim: 61
+lr_input_dim: 10040001

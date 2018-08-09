@@ -8,6 +8,16 @@ from train import dnn_layer_dims
 import reader
 from utils import logger, ModelType
 
+# --model_gz_path
+# ./ctr_models-pass-0-batch-0-test-0.676626739502.tar.gz
+# --data_path
+# ./output/infer.txt
+# --prediction_output_path
+# predictions.txt
+# --data_meta_path
+# ./output/data.meta.txt
+# --model_type=0
+
 parser = argparse.ArgumentParser(description="PaddlePaddle CTR example")
 parser.add_argument(
     '--model_gz_path',
@@ -42,38 +52,35 @@ paddle.init(use_gpu=False, trainer_count=1)
 class CTRInferer(object):
     def __init__(self, param_path):
         logger.info("create CTR model")
+
+        # dnn_input_dim: 61
+        # lr_input_dim: 10040001
         dnn_input_dim, lr_input_dim = reader.load_data_meta(args.data_meta_path)
         # create the mdoel
         self.ctr_model = network_conf.CTRmodel(
-            dnn_layer_dims,
-            dnn_input_dim,
-            lr_input_dim,
+            dnn_layer_dims, #[128, 64, 32, 1]
+            dnn_input_dim,  #61
+            lr_input_dim,   #10040001
             model_type=ModelType(args.model_type),
             is_infer=True)
         # load parameter
         logger.info("load model parameters from %s" % param_path)
-        self.parameters = paddle.parameters.Parameters.from_tar(
-            gzip.open(param_path, 'r'))
-        self.inferer = paddle.inference.Inference(
-            output_layer=self.ctr_model.model,
-            parameters=self.parameters, )
+        self.parameters = paddle.parameters.Parameters.from_tar(gzip.open(param_path, 'r'))
+        self.inferer = paddle.inference.Inference(output_layer=self.ctr_model.model,parameters=self.parameters, )
 
     def infer(self, data_path):
         logger.info("infer data...")
         dataset = reader.Dataset()
-        infer_reader = paddle.batch(
-            dataset.infer(args.data_path), batch_size=100)
+        infer_reader = paddle.batch(dataset.infer(args.data_path), batch_size=100)
         logger.warning('write predictions to %s' % args.prediction_output_path)
         output_f = open(args.prediction_output_path, 'w')
         for id, batch in enumerate(infer_reader()):
             res = self.inferer.infer(input=batch)
             predictions = [x for x in itertools.chain.from_iterable(res)]
-            assert len(batch) == len(
-                predictions), "predict error, %d inputs, but %d predictions" % (
-                    len(batch), len(predictions))
+            assert len(batch) == len(predictions), "predict error, %d inputs, but %d predictions" % (len(batch), len(predictions))
             output_f.write('\n'.join(map(str, predictions)) + '\n')
 
 
 if __name__ == '__main__':
     ctr_inferer = CTRInferer(args.model_gz_path)
-    ctr_inferer.infer(args.data_path)
+    ctr_inferer.infer(args.data_path) # data_path=./output/infer.txt

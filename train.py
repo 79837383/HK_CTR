@@ -86,8 +86,7 @@ def train():
         if isinstance(event, paddle.event.EndIteration):
             num_samples = event.batch_id * args.batch_size
             if event.batch_id % 100 == 0:
-                logger.warning("Pass %d, Samples %d, Cost %f, %s" % (
-                    event.pass_id, num_samples, event.cost, event.metrics))
+                logger.warning("Pass %d, Samples %d, Cost %f, %s" % (event.pass_id, num_samples, event.cost, event.metrics))
 
             if event.batch_id % 1000 == 0:
                 if args.test_data_path:
@@ -101,8 +100,7 @@ def train():
                     trainer.save_parameter_to_tar(f)
 
     trainer.train(
-        reader=paddle.batch(paddle.reader.shuffle(dataset.train(args.train_data_path), buf_size=500),
-                            batch_size=args.batch_size),
+        reader=paddle.batch(paddle.reader.shuffle(dataset.train(args.train_data_path), buf_size=500),batch_size=args.batch_size),
         feeding=reader.feeding_index,
         event_handler=__event_handler__,
         num_passes=args.num_passes)

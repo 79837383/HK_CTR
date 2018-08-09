@@ -27,8 +27,8 @@ class CTRmodel(object):
             whether to build a infer model
         '''
         self.dnn_layer_dims = dnn_layer_dims #[128, 64, 32, 1]
-        self.dnn_input_dim = dnn_input_dim #61
-        self.lr_input_dim = lr_input_dim #10040001
+        self.dnn_input_dim = dnn_input_dim   #61
+        self.lr_input_dim = lr_input_dim   #10040001
         self.model_type = model_type #classification=0  regression=1
         self.is_infer = is_infer #true false
 
@@ -45,16 +45,14 @@ class CTRmodel(object):
             self.model = self._build_regression_model(self.dnn, self.lr)
 
     def _declare_input_layers(self):
-        self.dnn_merged_input = layer.data(
-            name='dnn_input',
+        self.dnn_merged_input = layer.data(name='dnn_input',
             #type    InputType(dim=61, seq_type=SequenceType.NO_SEQUENCE, type=DataType.SparseNonValue)
             # sparse_binary_vector 稀疏的01向量，即大部分值为0，但有值的地方必须为1
-            type=paddle.data_type.sparse_binary_vector(self.dnn_input_dim)) #稀疏二进制向量  #dnn_input_dim #61
+            type=paddle.data_type.sparse_binary_vector(self.dnn_input_dim)) #  #dnn_input_dim #61
 
-        self.lr_merged_input = layer.data(
-            name='lr_input',
+        self.lr_merged_input = layer.data(name='lr_input',
             #type    InputType(dim=10040001, seq_type=SequenceType.NO_SEQUENCE, type=DataType.SparseValue)
-            type=paddle.data_type.sparse_float_vector(self.lr_input_dim)) #稀疏浮点向量
+            type=paddle.data_type.sparse_float_vector(self.lr_input_dim)) #
 
         if not self.is_infer:
             self.click = paddle.layer.data(
@@ -65,12 +63,10 @@ class CTRmodel(object):
         build DNN submodel.  # dnn_layer_dims = [128, 64, 32, 1]
         '''
         #dnn_merged_input是一个数据层，这个全连接层是128维的
-        dnn_embedding = layer.fc(input=self.dnn_merged_input,
-                                 size=dnn_layer_dims[0])
+        dnn_embedding = layer.fc(input=self.dnn_merged_input,size=dnn_layer_dims[0])
         _input_layer = dnn_embedding
         for i, dim in enumerate(dnn_layer_dims[1:]):  #64, 32, 1
-            fc = layer.fc(input=_input_layer,
-                          size=dim,
+            fc = layer.fc(input=_input_layer,size=dim,
                           act=paddle.activation.Relu(),#ReLU activation
                           name='dnn-fc-%d' % i)
             _input_layer = fc
@@ -80,22 +76,17 @@ class CTRmodel(object):
         '''
         config LR submodel
         '''
-        fc = layer.fc(input=self.lr_merged_input,
-                      size=1,
-                      act=paddle.activation.Relu())
+        fc = layer.fc(input=self.lr_merged_input,size=1,act=paddle.activation.Relu())
         return fc
 
     def _build_classification_model(self, dnn, lr):
         merge_layer = layer.concat(input=[dnn, lr])
-        self.output = layer.fc(
-            input=merge_layer,
-            size=1,
+        self.output = layer.fc(input=merge_layer,size=1,
             # use sigmoid function to approximate ctr rate, a float value between 0 and 1.
             act=paddle.activation.Sigmoid())
 
         if not self.is_infer: #如果不是预测就添加上label
-            self.train_cost = paddle.layer.multi_binary_label_cross_entropy_cost( #交叉熵
-                input=self.output, label=self.click)
+            self.train_cost = paddle.layer.multi_binary_label_cross_entropy_cost(input=self.output, label=self.click) #交叉熵
         return self.output
 
     def _build_regression_model(self, dnn, lr):

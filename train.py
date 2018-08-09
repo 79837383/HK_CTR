@@ -74,7 +74,7 @@ def train():
         is_infer=False)
 
     params = paddle.parameters.create(model.train_cost)
-    optimizer = paddle.optimizer.AdaGrad()
+    optimizer = paddle.optimizer.AdaGrad() #学习率优化
 
     trainer = paddle.trainer.SGD(cost=model.train_cost,
                                  parameters=params,
@@ -92,25 +92,17 @@ def train():
             if event.batch_id % 1000 == 0:
                 if args.test_data_path:
                     result = trainer.test(
-                        reader=paddle.batch(
-                            dataset.test(args.test_data_path),
-                            batch_size=args.batch_size),
+                        reader=paddle.batch(dataset.test(args.test_data_path),batch_size=args.batch_size),
                         feeding=reader.feeding_index)
-                    logger.warning("Test %d-%d, Cost %f, %s" %
-                                   (event.pass_id, event.batch_id, result.cost,
-                                    result.metrics))
+                    logger.warning("Test %d-%d, Cost %f, %s" % (event.pass_id, event.batch_id, result.cost,result.metrics))
 
-                path = "{}-pass-{}-batch-{}-test-{}.tar.gz".format(
-                    args.model_output_prefix, event.pass_id, event.batch_id,
-                    result.cost)
+                path = "{}-pass-{}-batch-{}-test-{}.tar.gz".format(args.model_output_prefix, event.pass_id, event.batch_id,result.cost)
                 with gzip.open(path, 'w') as f:
                     trainer.save_parameter_to_tar(f)
 
     trainer.train(
-        reader=paddle.batch(
-            paddle.reader.shuffle(
-                dataset.train(args.train_data_path), buf_size=500),
-            batch_size=args.batch_size),
+        reader=paddle.batch(paddle.reader.shuffle(dataset.train(args.train_data_path), buf_size=500),
+                            batch_size=args.batch_size),
         feeding=reader.feeding_index,
         event_handler=__event_handler__,
         num_passes=args.num_passes)

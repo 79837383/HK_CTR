@@ -36,7 +36,7 @@ class Dataset(object):
         def _parse():
             with open(path) as f:
                 for line_id, line in enumerate(f):
-                    fs = line.strip().split('\t')
+                    fs = line.strip().split('\t')  #1 7 11 20 28 34 36	\t 5804:1 14607:1 21244:1 34453:1 122530:1	\t 0
                     dnn_input = load_dnn_input_record(fs[0])
                     lr_input = load_lr_input_record(fs[1])
                     if not mode.is_infer():

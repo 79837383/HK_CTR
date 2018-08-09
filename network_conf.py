@@ -48,7 +48,8 @@ class CTRmodel(object):
         self.dnn_merged_input = layer.data(
             name='dnn_input',
             #type    InputType(dim=61, seq_type=SequenceType.NO_SEQUENCE, type=DataType.SparseNonValue)
-            type=paddle.data_type.sparse_binary_vector(self.dnn_input_dim)) #稀疏二进制向量
+            # sparse_binary_vector 稀疏的01向量，即大部分值为0，但有值的地方必须为1
+            type=paddle.data_type.sparse_binary_vector(self.dnn_input_dim)) #稀疏二进制向量  #dnn_input_dim #61
 
         self.lr_merged_input = layer.data(
             name='lr_input',
@@ -57,7 +58,7 @@ class CTRmodel(object):
 
         if not self.is_infer:
             self.click = paddle.layer.data(
-                name='click', type=dtype.dense_vector(1)) #稠密向量
+                name='click', type=dtype.dense_vector(1)) #dense_vector  稠密浮点向量
 
     def _build_dnn_submodel_(self, dnn_layer_dims):
         '''
@@ -67,7 +68,7 @@ class CTRmodel(object):
         dnn_embedding = layer.fc(input=self.dnn_merged_input,
                                  size=dnn_layer_dims[0])
         _input_layer = dnn_embedding
-        for i, dim in enumerate(dnn_layer_dims[1:]):
+        for i, dim in enumerate(dnn_layer_dims[1:]):  #64, 32, 1
             fc = layer.fc(input=_input_layer,
                           size=dim,
                           act=paddle.activation.Relu(),#ReLU activation
@@ -92,7 +93,7 @@ class CTRmodel(object):
             # use sigmoid function to approximate ctr rate, a float value between 0 and 1.
             act=paddle.activation.Sigmoid())
 
-        if not self.is_infer:
+        if not self.is_infer: #如果不是预测就添加上label
             self.train_cost = paddle.layer.multi_binary_label_cross_entropy_cost( #交叉熵
                 input=self.output, label=self.click)
         return self.output

@@ -3,3 +3,5 @@
 *.pyc
 *.log
 /venv/
+*.tgz
+*.gz

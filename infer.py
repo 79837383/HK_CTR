@@ -62,7 +62,7 @@ class CTRInferer(object):
         logger.info("infer data...")
         dataset = reader.Dataset()
         infer_reader = paddle.batch(
-            dataset.infer(args.data_path), batch_size=1000)
+            dataset.infer(args.data_path), batch_size=100)
         logger.warning('write predictions to %s' % args.prediction_output_path)
         output_f = open(args.prediction_output_path, 'w')
         for id, batch in enumerate(infer_reader()):

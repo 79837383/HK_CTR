@@ -125,7 +125,8 @@ class CategoryFeatureGenerator(object):
         self.dic = {'unk': 0}
         self.counter = 1
 
-    #获取数据集中同一个属性有多少种不同的值
+    #获取数据集中同一个属性有多少种不同的值，并且将原来的取值替换为我们自己规定的取值例如：
+    #('C1', {'1005': 1, 'unk': 0, '1010': 3, '1002': 2, '1001': 4})
     def register(self, key):
         '''
         Register record.

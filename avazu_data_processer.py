@@ -489,6 +489,8 @@ output_testset_path = os.path.join(args.output_dir, 'test.txt')
 output_infer_path = os.path.join(args.output_dir, 'infer.txt')
 output_meta_path = os.path.join(args.output_dir, 'data.meta.txt')
 
+#在此案例中test.txt和infer.txt都是取的同一块的数据，只是infer.txt不带click标记,都是--test_set_size 100条
+
 #('output/train.txt', 'output/test.txt', 'output/infer.txt', 'output/data.meta.txt')
 #print (output_trainset_path,output_testset_path,output_infer_path,output_meta_path)
 

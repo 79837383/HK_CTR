@@ -99,6 +99,8 @@ feature_dims = {}
 categorial_features = (
     'C1 banner_pos site_category app_category ' + 'device_type device_conn_type'
 ).split()
+#[5, 3, 11, 8, 5, 4, 24]
+
 
 id_features = 'id site_id app_id device_id _device_id_cross_site_id'.split()
 

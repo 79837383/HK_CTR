@@ -39,6 +39,9 @@ class Dataset(object):
                     fs = line.strip().split('\t')  #1 7 11 20 28 34 36	\t 5804:1 14607:1 21244:1 34453:1 122530:1	\t 0
                     dnn_input = load_dnn_input_record(fs[0])
                     lr_input = load_lr_input_record(fs[1])
+                    # print dnn_input
+                    # print lr_input
+                    # exit(0)
                     if not mode.is_infer():
                         click = [int(fs[2])]
                         yield dnn_input, lr_input, click
